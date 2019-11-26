@@ -67,6 +67,7 @@ struct GAME_INFO{   // Struct to store the game info
 	int difficulty;
 	int errors;
 	int speed;
+	int scoreMultiplier;
 };
 
 typedef struct WORD{
@@ -75,7 +76,6 @@ typedef struct WORD{
 	int posX;
 	int posY;
 	int speed;
-	int index;
 	int color;
 } word;
 
@@ -88,11 +88,11 @@ void init_settings(void *info); // Initializes some terminal/video settings
 
 void createNewWord(word newWord[], char *string, int wordIndex, int speedMultiplier);
 
-void deleteWord(struct WORD *deleteWord, int index);
+void deleteWord(word words[], int toRemove, int wordsOnScreenQnt);
 
-int checkWord(char *string, char availableWords[][DEFAULT_STRING_LENGTH], int availableWordsQnt);
+int checkWord(char *string, struct WORD *availableWords, int availableWordsQnt);
 
-void orderWordsIndexes(struct WORD *wordIndex, char wordsOnScreen[][DEFAULT_STRING_LENGTH], int indexToDelete, int *availableWordsQnt);
+void updateStats(void *info);
 
 void init(void);
 

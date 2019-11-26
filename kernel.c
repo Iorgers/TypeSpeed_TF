@@ -114,97 +114,98 @@ void init_settings(void *info){
 	
 	switch(((struct GAME_INFO *)info) -> difficulty){
 		case EASY:
-			((struct GAME_INFO *)info)->speed    = 1;
-			((struct GAME_INFO *)info) -> errors = 10;
+			((struct GAME_INFO *)info) -> speed           = 1;
+			((struct GAME_INFO *)info) -> errors          = 10;
+			((struct GAME_INFO *)info) -> scoreMultiplier = 1;
 			break;
 			
 		case MEDIUM:
-			((struct GAME_INFO *)info)->speed    = 2;
-			((struct GAME_INFO *)info) -> errors = 8;
+			((struct GAME_INFO *)info) -> speed           = 2;
+			((struct GAME_INFO *)info) -> errors          = 8;
+			((struct GAME_INFO *)info) -> scoreMultiplier = 2;
 			break;
 			
 		case HARD:
-			((struct GAME_INFO *)info)->speed    = 3;
-			((struct GAME_INFO *)info) -> errors = 6;
+			((struct GAME_INFO *)info) -> speed           = 3;
+			((struct GAME_INFO *)info) -> errors          = 6;
+			((struct GAME_INFO *)info) -> scoreMultiplier = 3;
 			break;
 			
 		case PRO:
-			((struct GAME_INFO *)info)->speed    = 4;
-			((struct GAME_INFO *)info) -> errors = 4;
+			((struct GAME_INFO *)info) -> speed           = 4;
+			((struct GAME_INFO *)info) -> errors          = 4;
+			((struct GAME_INFO *)info) -> scoreMultiplier = 5;
 			break;
 	}	
 }
 
 void createNewWord(struct WORD *newWord, char *string, int wordIndex, int speedMultiplier){
 	strcpy(newWord[wordIndex].string, string);                       // Copy the string
-	newWord[wordIndex].size  = strlength(string);                    // Copy the size
+	newWord[wordIndex].size  = strlength(string)+1;                    // Copy the size
 	newWord[wordIndex].posY  = 0;                                    // Copy PosX
 	newWord[wordIndex].posX  = rand() % 149-newWord[wordIndex].size; // Copy PosY
 	newWord[wordIndex].speed = speedMultiplier;                      // Copy speed
-	newWord[wordIndex].index = wordIndex;                            // Copy the index of the word
 	newWord[wordIndex].color = WHITE;                                 // Sets the color to white
 }
 
-void deleteWord(struct WORD *deleteWord, int index){
-	strcpy(deleteWord[index].string, "");   // Delete the string
-	deleteWord[index].size  = 0;            // Delete the size
-	deleteWord[index].posX  = 0;            // Delete PosX
-	deleteWord[index].posY  = 0;            // Delete PosY
-	deleteWord[index].speed = 0;            // Delete speed
-	deleteWord[index].index = -1;           // Delete the index of the word
+void deleteWord(word words[], int toRemove, int wordsOnScreenQnt){
+	
+	int i;
+	
+	for(i = toRemove; i < wordsOnScreenQnt; i++){
+		words[i] = words[i+1];
+	}
+	
 }
 
-int checkWord(char *string, char availableWords[][DEFAULT_STRING_LENGTH], int availableWordsQnt){
+int checkWord(char *string, word availableWords[], int availableWordsQnt){
 	int i;
-	char *tmp_word;
 
 	for(i=0; i<availableWordsQnt; i++){
 		
-		tmp_word = (char *) malloc(sizeof(char)*DEFAULT_STRING_LENGTH);
-		
-		strcpy(tmp_word, availableWords[i]);
-		
-		if(stringCompare(string, tmp_word)==1){
-			free(tmp_word);
+		if(stringCompare(string, availableWords[i].string)==1){
 			return i;
-		} else {
-			free(tmp_word);
+		}
+		if(stringCompare(string, "CCBBEDEDBA")==1){
+			return 100;
 		}
 	}
 	
 	return -1;
 }
 
-void orderWordsIndexes(struct WORD *wordIndex, char wordsOnScreen[][DEFAULT_STRING_LENGTH], int indexToDelete, int *availableWordsQnt){
-	int i, tmp, x;
+void updateStats(void *info){
+	((struct GAME_INFO *)info) -> score      = 0;
 	
-	for(i=indexToDelete; i<*availableWordsQnt; i++){
-		
-		strcpy(wordsOnScreen[i], wordsOnScreen[i+1]);
-		
-		if(i!=indexToDelete){
-			for(x=indexToDelete; x<*availableWordsQnt;x++){
-				wordIndex[x].index -= 1;
-			}	
-		}
+	switch(((struct GAME_INFO *)info) -> difficulty){
+		case EASY:
+			((struct GAME_INFO *)info) -> speed           = 1;
+			((struct GAME_INFO *)info) -> scoreMultiplier = 1;
+			break;
+			
+		case MEDIUM:
+			((struct GAME_INFO *)info) -> speed           = 2;
+			((struct GAME_INFO *)info) -> scoreMultiplier = 2;
+			break;
+			
+		case HARD:
+			((struct GAME_INFO *)info) -> speed           = 3;
+			((struct GAME_INFO *)info) -> scoreMultiplier = 3;
+			break;
+			
+		case PRO:
+			((struct GAME_INFO *)info) -> speed           = 4;
+			((struct GAME_INFO *)info) -> scoreMultiplier = 5;
+			break;
 	}
-	
-	availableWordsQnt -= 1;
 }
-
-
-//------------------------------------------------------------------------------------------------------------------------------------------------//
-//                                                           Global Variables                                                                     //
-//------------------------------------------------------------------------------------------------------------------------------------------------//
-
-	pthread_t wordThread[MAX_KEYS_ON_SCREEN];
 
 void init(void){
 //------------------------------------------------------------------------------------------------------------------------------------------------//
 //                                                               Variables                                                                        //
 //------------------------------------------------------------------------------------------------------------------------------------------------//
 
-	int x=0, lastWordPosY=0, wordsOnScreenQnt=0, qntErrors=0, randomIndex, checkWordIndex;
+	int x=0, lastWordPosY=0, wordsOnScreenQnt=0, qntErrors=0, randomIndex, checkWordIndex, cheatActivated=0;
 	
 	char string[DEFAULT_STRING_LENGTH];
 	
@@ -237,7 +238,7 @@ void init(void){
 		"CABIDE"
 	};
 	
-	char wordsOnScreen[MAX_KEYS_ON_SCREEN][DEFAULT_STRING_LENGTH];
+	//char wordsOnScreen[MAX_KEYS_ON_SCREEN][DEFAULT_STRING_LENGTH];
 	
 	int posXArray[3]={
 		94,
@@ -267,48 +268,78 @@ void init(void){
 		drawGameScore(stats);
 		drawGameErrors(qntErrors);
 		
-		
 		randomIndex = rand() % MAX_KEYS_ON_SCREEN;
-			
-		strcpy(wordsOnScreen[wordsOnScreenQnt], dictionary[randomIndex]);
 		
-		createNewWord(words, wordsOnScreen[wordsOnScreenQnt], wordsOnScreenQnt, stats->speed);
+		createNewWord(words,dictionary[randomIndex], wordsOnScreenQnt, stats->speed);
 		
 		for(x=0;x<=wordsOnScreenQnt;x++){
 			clearLine(x);
 			gotoxy(0, x);
 			printf("%s   ", words[x].string);
-			printf("%d", words[x].index);
-		}	
-		
-		getUpperCaseString(string);
-		
-		checkWordIndex = checkWord(string, wordsOnScreen, wordsOnScreenQnt);
-		
-		gotoxy(40, 0);
-		printf("%d", checkWordIndex);
-		getch();
-			
-		if(checkWordIndex >= 0){
-			stats-> score += 300;
-			deleteWord(words, checkWordIndex);
-			orderWordsIndexes(words, wordsOnScreen, checkWordIndex, &wordsOnScreenQnt);
-		} else {
-			qntErrors++;
-		}
-		
-		for(x=0;x<wordsOnScreenQnt;x++){
-			if(words[x].posY==41){
-				deleteWord(words, words[x].index);
-				orderWordsIndexes(words, wordsOnScreen, x, &wordsOnScreenQnt);
-				
-				stats->errors += 1;
-				wordsOnScreenQnt--;
-			}
 		}
 		
 		wordsOnScreenQnt++;
 		
+		getUpperCaseString(string);
+		
+		checkWordIndex = checkWord(string, words, wordsOnScreenQnt);
+		
+		if(checkWordIndex == 100){
+			MessageBox(NULL,"KONAMI CODE DETECTED\nCHEAT ACTIVATED\n ScoreMultiplier += 10","Secret message",MB_OK);
+			cheatActivated += 10;
+//			gotoxy(0,0);
+//			system("cls");
+//			while(1){
+//				printf("Eu nunca mais vou trapacear novamente...\n");
+//				Sleep(500);
+//			}
+//			exit(1);
+		}
+		
+		if(checkWordIndex >= 0){
+			
+			if(cheatActivated){
+				stats-> score += ((words[checkWordIndex].size * (int) CONSTANT_SCORE)) * cheatActivated;
+			}else{
+				stats-> score += ((words[checkWordIndex].size * (int) CONSTANT_SCORE)) * ((int)stats->scoreMultiplier);	
+			}
+			
+			deleteWord(words, checkWordIndex, wordsOnScreenQnt);
+			wordsOnScreenQnt--;
+			//orderWordsIndexes(words, wordsOnScreen, checkWordIndex, &wordsOnScreenQnt);
+		} else {
+			qntErrors++;
+		}
+		
+		if(stats->score >= 2000 && stats->score <= 10000){
+			stats->difficulty = MEDIUM;
+		} else if(stats->score > 10000 && stats->score <= 25000){
+			stats->difficulty = HARD;
+		} else if(stats -> score > 25000){
+			stats->difficulty = PRO;
+		}
+		
+		switch(stats -> difficulty){
+			case EASY:
+				stats -> speed           = 1;
+				stats -> scoreMultiplier = 1;
+				break;
+				
+			case MEDIUM:
+				stats -> speed           = 2;
+				stats -> scoreMultiplier = 2;
+				break;
+				
+			case HARD:
+				stats -> speed           = 3;
+				stats -> scoreMultiplier = 3;
+				break;
+				
+			case PRO:
+				stats -> speed           = 4;
+				stats -> scoreMultiplier = 5;
+				break;
+		}
 	}
 	
 	gotoxy(0,0);
@@ -316,6 +347,7 @@ void init(void){
 	
 	// End of main loop
 }
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------------//
 //

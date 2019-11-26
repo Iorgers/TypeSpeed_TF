@@ -125,8 +125,26 @@ void clearLine(int posY){
 	printf("                                                                                                                                                    ");
 }
 
-void *drawWord(void *wordOnScreen){
+void *drawWordOnScreen(struct WORD *wordOnScreen, int wordIndex, int option){
 	
+	switch(option){
+		case 1:
+			gotoxy(wordOnScreen[wordIndex].posX, wordOnScreen[wordIndex].posY);
+			printf("%s", wordOnScreen[wordIndex].string);
+			break;
+			
+		case 2:
+			if(wordOnScreen[wordIndex].posY + 1 == 42){
+				strcpy(wordOnScreen[wordIndex].string, "");
+			} else {
+				wordOnScreen[wordIndex].posY += 1;
+			}
+			break;
+			
+		case 3:
+			
+			break;
+	}
 	
 }
 

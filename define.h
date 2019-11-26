@@ -32,4 +32,6 @@
 #define HARD    2
 #define PRO     3
 
+#define CONSTANT_SCORE 50
+
 #endif

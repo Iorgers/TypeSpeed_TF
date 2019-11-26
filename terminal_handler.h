@@ -17,4 +17,6 @@ void *drawGameErrors(int qntErrors);
 
 void clearLine(int posY);
 
+void *drawWord(struct WORD *wordOnScreen, int wordIndex, int option);
+
 #endif
