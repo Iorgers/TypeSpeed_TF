@@ -106,46 +106,42 @@ void init_settings(void *info){
 	
 	srand(time(0));
 	
-	setWindowSize();
-	
-	_setcursortype(_NOCURSOR);
-	
 	drawBox(0, 42, 0, 44, 149, 44, 149, 42);
 	
 	switch(((struct GAME_INFO *)info) -> difficulty){
 		case EASY:
 			((struct GAME_INFO *)info) -> speed           = 1;
-			((struct GAME_INFO *)info) -> errors          = 10;
+			((struct GAME_INFO *)info) -> errors          = 16;
 			((struct GAME_INFO *)info) -> scoreMultiplier = 1;
 			break;
 			
 		case MEDIUM:
 			((struct GAME_INFO *)info) -> speed           = 2;
-			((struct GAME_INFO *)info) -> errors          = 8;
+			((struct GAME_INFO *)info) -> errors          = 12;
 			((struct GAME_INFO *)info) -> scoreMultiplier = 2;
 			break;
 			
 		case HARD:
 			((struct GAME_INFO *)info) -> speed           = 3;
-			((struct GAME_INFO *)info) -> errors          = 6;
+			((struct GAME_INFO *)info) -> errors          = 8;
 			((struct GAME_INFO *)info) -> scoreMultiplier = 3;
 			break;
 			
 		case PRO:
 			((struct GAME_INFO *)info) -> speed           = 4;
-			((struct GAME_INFO *)info) -> errors          = 4;
+			((struct GAME_INFO *)info) -> errors          = 5;
 			((struct GAME_INFO *)info) -> scoreMultiplier = 5;
 			break;
 	}	
 }
 
-void createNewWord(struct WORD *newWord, char *string, int wordIndex, int speedMultiplier){
+void createNewWord(word newWord[], char *string, int wordIndex, int speedMultiplier){
 	strcpy(newWord[wordIndex].string, string);                       // Copy the string
 	newWord[wordIndex].size  = strlength(string)+1;                    // Copy the size
 	newWord[wordIndex].posY  = 0;                                    // Copy PosX
 	newWord[wordIndex].posX  = rand() % 149-newWord[wordIndex].size; // Copy PosY
 	newWord[wordIndex].speed = speedMultiplier;                      // Copy speed
-	newWord[wordIndex].color = WHITE;                                 // Sets the color to white
+	newWord[wordIndex].color = LIGHTGREEN;                                 // Sets the color to white
 }
 
 void deleteWord(word words[], int toRemove, int wordsOnScreenQnt){
@@ -174,76 +170,145 @@ int checkWord(char *string, word availableWords[], int availableWordsQnt){
 	return -1;
 }
 
-void updateStats(void *info){
-	((struct GAME_INFO *)info) -> score      = 0;
+int randomYPosition(word words[], int availableWordsQnt){
+	int i, randomIndex, notAvailable=1;
 	
-	switch(((struct GAME_INFO *)info) -> difficulty){
-		case EASY:
-			((struct GAME_INFO *)info) -> speed           = 1;
-			((struct GAME_INFO *)info) -> scoreMultiplier = 1;
-			break;
+	if(availableWordsQnt==0){
+		
+		randomIndex = rand() % 38;
+		
+	} else {
+		
+		while(notAvailable > 0){
 			
-		case MEDIUM:
-			((struct GAME_INFO *)info) -> speed           = 2;
-			((struct GAME_INFO *)info) -> scoreMultiplier = 2;
-			break;
+			notAvailable = 0;
 			
-		case HARD:
-			((struct GAME_INFO *)info) -> speed           = 3;
-			((struct GAME_INFO *)info) -> scoreMultiplier = 3;
-			break;
+			randomIndex = rand()%38;
 			
-		case PRO:
-			((struct GAME_INFO *)info) -> speed           = 4;
-			((struct GAME_INFO *)info) -> scoreMultiplier = 5;
-			break;
+			for(i=0;i<availableWordsQnt;i++){
+				if(randomIndex == words[i].posY){
+					notAvailable++;
+				}
+			}	
+		}
 	}
+	
+	return randomIndex;
+	
 }
 
-void init(void){
+int init(void){
 //------------------------------------------------------------------------------------------------------------------------------------------------//
 //                                                               Variables                                                                        //
 //------------------------------------------------------------------------------------------------------------------------------------------------//
 
-	int x=0, lastWordPosY=0, wordsOnScreenQnt=0, qntErrors=0, randomIndex, checkWordIndex, cheatActivated=0;
-	
+	int x=0, wordsOnScreenQnt=0, qntErrors=0, randomIndex, checkWordIndex;	
 	char string[DEFAULT_STRING_LENGTH];
 	
 	struct GAME_INFO *stats;
+	
+	HIGHSCORE highscoreInformations;
 	
 	stats = (void*) malloc(sizeof(struct GAME_INFO));
 	
 	word words[MAX_KEYS_ON_SCREEN];
 	
-	char dictionary[MAX_KEYS_ON_SCREEN][DEFAULT_STRING_LENGTH]={
-		"TESTE",
-		"AMOR",
-		"ANO",
-		"ANJO",
-		"BALEIA",
-		"BRINCAR",
-		"BATOM",
-		"BATATA",
-		"BOCA",
-		"BIBLIA",
-		"BEXIGA",
-		"RECURSIVIDADE",
-		"LOOP",
-		"AVENTAL",
-		"COR",
-		"BEAT",
-		"DADO",
-		"CALOR",
-		"CASA",
-		"CABIDE"
-	};
-	
-	//char wordsOnScreen[MAX_KEYS_ON_SCREEN][DEFAULT_STRING_LENGTH];
-	
 	int posXArray[3]={
 		94,
 		109,
 		132
+	};
+	
+	char dictionaryEASY[MAX_KEYS_ON_SCREEN][DEFAULT_STRING_LENGTH]={
+		"LASER",
+		"BUG",
+		"CORSA",
+		"VAGAS",
+		"POLVO",
+		"BRASIL",
+		"CHAVE",
+		"SAPATO",
+		"PAPEL",
+		"CABO",
+		"MONDIAL",
+		"SOL",
+		"PAGODE",
+		"PORTA",
+		"PLANTA",
+		"HUMANO",
+		"MESA",
+		"LUZ",
+		"PLANETA",
+		"FOTO"
+	};
+	
+	char dictionaryMEDIUM[MAX_KEYS_ON_SCREEN][DEFAULT_STRING_LENGTH]={
+		"SABONETE",
+		"GROISMAN",
+		"SENNINHA",
+		"PALINDROMO",
+		"MACHADO",
+		"UNIVERSIDADE",
+		"IBIRAPUERA",
+		"DARWIN",
+		"RECURSIVIDADE",
+		"BRIOCHE",
+		"BRICOLAGEM",
+		"ERUDITO",
+		"GEMATRIA",
+		"SALGADO",
+		"TRITONGO",
+		"ZURETA",
+		"ATOSSICAR",
+		"DIPIRONA",
+		"FONTURA",
+		"ENTROPIA"
+	};
+	
+	char dictionaryHARD[MAX_KEYS_ON_SCREEN][DEFAULT_STRING_LENGTH]={
+		"MASSARANDUBA",
+		"CHIKUNGUNYA",
+		"ECMNESIA",
+		"MITSUBISHI",
+		"HELIOPATIA",
+		"CHAMPIGNON",
+		"BUONARROTI",
+		"HEXAEDRO",
+		"TERGIVERSAR",
+		"TUNGSTENIO",
+		"KOEGNIGSEGG",
+		"PARALELEPIPEDO",
+		"ICONOCLASTA",
+		"INHOMIRIM",
+		"CATAPULTA",
+		"TRABUCO",
+		"ESTALACTITE",
+		"EXCALIBUR",
+		"DRUMMOND ",
+		"TAXIDERMISTA "
+	};
+	
+	char dictionaryPRO[MAX_KEYS_ON_SCREEN][DEFAULT_STRING_LENGTH]={
+		"INFUNDIBULIFORME",
+		"PARADICLOROBENZENO",
+		"SCHWARZENEGGER",
+		"ANTICONSTITUCIONALISMO",
+		"SCHRODINGER",
+		"ORNITORRINCO",
+		"PNEUMOULTRAMICROSCOPICOSSILICOVULCANOCONIOSE",
+		"SCHOPENHAUER",
+		"SCHNAUZER",
+		"MENINGOENCEFALOMIELITE",
+		"TRAQUELATLOIDOCCIPITAL",
+		"IDIOSSINCRASIA",
+		"REINDUSTRIALIZAR",
+		"OTORRINOLARINGOLOGISTA ",
+		"DESOXIRRIBONUCLEICO",
+		"MONOSIALOTETRAESOSILGANGLIOSIDEO",
+		"MILTIDISCIPLINARIDADE",
+		"DESPROPORCIONALIZAR",
+		"EXTRATERRITORIALIDADE",
+		"OTORRINOLARINGOLOGISTA"
 	};
 	
 //------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -261,6 +326,7 @@ void init(void){
 	while(qntErrors < stats-> errors){
 		
 		clearLine(43);
+		drawBox(0, 42, 0, 44, 149, 44, 149, 42);
 		drawMultipleDivisions(posXArray, 42, 44, 3);
 		
 		drawInputLocation();
@@ -268,50 +334,60 @@ void init(void){
 		drawGameScore(stats);
 		drawGameErrors(qntErrors);
 		
-		randomIndex = rand() % MAX_KEYS_ON_SCREEN;
-		
-		createNewWord(words,dictionary[randomIndex], wordsOnScreenQnt, stats->speed);
-		
-		for(x=0;x<=wordsOnScreenQnt;x++){
-			clearLine(x);
-			gotoxy(0, x);
-			printf("%s   ", words[x].string);
+		if(wordsOnScreenQnt<20){
+			randomIndex = rand() % MAX_KEYS_ON_SCREEN;
+			
+			switch(stats -> difficulty){
+			case EASY:
+				createNewWord(words,dictionaryEASY[randomIndex], wordsOnScreenQnt, stats->speed);
+				break;
+				
+			case MEDIUM:
+				createNewWord(words,dictionaryMEDIUM[randomIndex], wordsOnScreenQnt, stats->speed);
+				break;
+				
+			case HARD:
+				createNewWord(words,dictionaryHARD[randomIndex], wordsOnScreenQnt, stats->speed);
+				break;
+				
+			case PRO:
+				createNewWord(words,dictionaryPRO[randomIndex], wordsOnScreenQnt, stats->speed);
+				break;
 		}
-		
-		wordsOnScreenQnt++;
+			
+			words[wordsOnScreenQnt].posY = randomYPosition(words, wordsOnScreenQnt);
+			
+			gotoxy(words[wordsOnScreenQnt].posX, words[wordsOnScreenQnt].posY);
+			textcolor(words[wordsOnScreenQnt].color);
+			printf("%s", words[wordsOnScreenQnt].string);
+			textcolor(WHITE);
+			
+			wordsOnScreenQnt++;
+		}
 		
 		getUpperCaseString(string);
 		
 		checkWordIndex = checkWord(string, words, wordsOnScreenQnt);
 		
 		if(checkWordIndex == 100){
-			MessageBox(NULL,"KONAMI CODE DETECTED\nCHEAT ACTIVATED\n ScoreMultiplier += 10","Secret message",MB_OK);
-			cheatActivated += 10;
-//			gotoxy(0,0);
-//			system("cls");
-//			while(1){
-//				printf("Eu nunca mais vou trapacear novamente...\n");
-//				Sleep(500);
-//			}
-//			exit(1);
+			MessageBox(NULL,"KONAMI CODE DETECTED\n ScoreMultiplier += 10","CHEAT ACTIVATED",MB_OK);
+			stats -> scoreMultiplier += 10;
 		}
 		
 		if(checkWordIndex >= 0){
 			
-			if(cheatActivated){
-				stats-> score += ((words[checkWordIndex].size * (int) CONSTANT_SCORE)) * cheatActivated;
-			}else{
-				stats-> score += ((words[checkWordIndex].size * (int) CONSTANT_SCORE)) * ((int)stats->scoreMultiplier);	
-			}
+			stats-> score += ((words[checkWordIndex].size * (int) CONSTANT_SCORE)) * ((int)stats->scoreMultiplier);	
 			
+			clearLine(words[checkWordIndex].posY);
 			deleteWord(words, checkWordIndex, wordsOnScreenQnt);
 			wordsOnScreenQnt--;
-			//orderWordsIndexes(words, wordsOnScreen, checkWordIndex, &wordsOnScreenQnt);
 		} else {
 			qntErrors++;
 		}
 		
-		if(stats->score >= 2000 && stats->score <= 10000){
+		if(stats->score < 2000){
+			stats->difficulty = EASY;
+		}else if(stats->score >= 2000 && stats->score <= 10000){
 			stats->difficulty = MEDIUM;
 		} else if(stats->score > 10000 && stats->score <= 25000){
 			stats->difficulty = HARD;
@@ -342,8 +418,13 @@ void init(void){
 		}
 	}
 	
-	gotoxy(0,0);
-	printf("GAME OVER");
+//	highscoreInformations.score = stats->score;
+//	highscoreInformations.errors = stats->errors;
+//	
+//	system("cls");
+	
+	
+	return 0;
 	
 	// End of main loop
 }
