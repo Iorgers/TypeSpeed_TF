@@ -3,6 +3,34 @@
 #include "kernel.h"
 #include "define.h"
 
+int getTeclaSobreAjuda(void){
+	int tecla=0, pisca=0, enter;
+
+	do{	
+		gotoxy(120, 40);
+		Sleep(400);
+		if(pisca == 0){
+			textcolor(WHITE);
+			printf("%c", 175);
+			pisca++;
+		} else {
+			textcolor(BLACK);
+			printf("%c", 175);
+			pisca--;
+		}
+		gotoxy(91, 29);
+
+		fflush(stdin);
+		enter = getch();
+
+		if(enter == RETURN_KEY) {
+			tecla = RETURN_KEY;
+		}
+	}while(!enter); // enter == 0
+
+	return tecla;
+}
+
 int getArrowKey(void){
 	int key, key_check, validKeyPressed = FALSE;
 
@@ -11,6 +39,10 @@ int getArrowKey(void){
 		fflush(stdin);
 		
 		key_check = getch();
+		
+		if(key_check == RETURN_KEY){
+			return key_check;
+		}
 		
 		if(key_check == ARROW_KEY_CONTROL_VALUE){ // ARROW_KEY_CONTROL_VALUE is the value returned by getch(), which determines that an arrow key was pressed.
 			key = getch();
@@ -23,7 +55,7 @@ int getArrowKey(void){
 }
 
 int verifyArrowKey(int pressedKey){
-	if(pressedKey == UP_ARROW || pressedKey == DOWN_ARROW  || pressedKey == LEFT_ARROW || pressedKey == RIGHT_ARROW){
+	if(pressedKey == UP_ARROW || pressedKey == DOWN_ARROW){
 			return TRUE;
 	} else {
 		return FALSE;

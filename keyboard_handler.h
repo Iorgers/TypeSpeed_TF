@@ -1,6 +1,7 @@
 #ifndef KEYBOARD_HANDLER_H
 #define KEYBOARD_HANDLER_H
 
+int getTeclaSobreAjuda(void);
 
 int getArrowKey(void);
 

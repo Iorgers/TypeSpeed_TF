@@ -79,6 +79,16 @@ typedef struct WORD{
 	int color;
 } word;
 
+struct PLAYER_INFO{
+	char name[DEFAULT_STRING_LENGTH];
+};
+
+typedef struct highscore{
+	int score;
+	int errors;
+	struct PLAYER_INFO playerInformation;
+} HIGHSCORE;
+
 void getMonitorResolution(unsigned int *horizontal, unsigned int *vertical); // Get the monitor resolution :)
 
 void setWindowSize(void); // It sets the window size based on "IS_RELATIVE_WINDOW_SIZE", where FALSE results in a standart size
@@ -92,8 +102,8 @@ void deleteWord(word words[], int toRemove, int wordsOnScreenQnt);
 
 int checkWord(char *string, struct WORD *availableWords, int availableWordsQnt);
 
-void updateStats(void *info);
+int randomYPosition(word words[], int availableWordsQnt);
 
-void init(void);
+int init(void);
 
 #endif

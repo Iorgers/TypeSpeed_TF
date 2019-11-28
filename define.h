@@ -7,6 +7,7 @@
 #define DOWN_ARROW  80
 #define LEFT_ARROW  75
 #define RIGHT_ARROW 77
+#define RETURN_KEY 13
 
 #define ARROW_KEY_CONTROL_VALUE 224
 
@@ -17,7 +18,7 @@
 
 // Control variables
 
-#define DEFAULT_STRING_LENGTH 30
+#define DEFAULT_STRING_LENGTH 50
 
 #define IS_RELATIVE_WINDOW_SIZE FALSE
 
@@ -26,6 +27,8 @@
 #define _NOCURSOR      0
 #define _SOLIDCURSOR   1
 #define _NORMALCURSOR  2
+
+// Game Settings
 
 #define EASY    0
 #define MEDIUM  1
